@@ -1,0 +1,20 @@
+# Local shop data and credentials: never commit or distribute.
+/data/
+/logs/
+/.tools/
+/dist/
+/runtime/node.exe
+/node_modules/
+*.log
+*.tmp
+.env
+.env.*
+!.env.example
+/tests/*.png
+/android/.gradle/
+/android/.idea/
+/android/local.properties
+/android/**/build/
+*.jks
+*.keystore
+/.vscode/

@@ -1,0 +1,6 @@
+(function(){
+ const queue=[],last=new Map();let sending=false;
+ function report(kind,error){const message=String(error?.message||error||'Unknown error').slice(0,2000),key=kind+message;if(Date.now()-(last.get(key)||0)<30000)return;last.set(key,Date.now());if(last.size>100)last.delete(last.keys().next().value);queue.push({kind,message,stack:String(error?.stack||'').slice(0,3000)});if(queue.length>10)queue.shift();flush();}
+ async function flush(){if(sending||!queue.length)return;let token;try{token=config?.token;}catch{return;}if(!token)return;sending=true;try{const response=await fetch('/api/client-log',{method:'POST',signal:AbortSignal.timeout(3000),headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(queue[0])});if(response.ok||response.status===429)queue.shift();}catch{}finally{sending=false;}}
+ window.ClientLog={report};window.addEventListener('error',event=>{if(event.error)report('javascript',event.error);else if(event.message)report('javascript',event.message);else if(event.target?.tagName==='SCRIPT')report('script_load','Script failed to load: '+new URL(event.target.src).pathname);},true);window.addEventListener('unhandledrejection',event=>report('unhandled_rejection',event.reason));setInterval(flush,5000);
+})();
